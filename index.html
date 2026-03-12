@@ -429,6 +429,19 @@
   }
 
   render();
+
+  // Wake Lock — keep screen on while the app is active
+  let wakeLock = null;
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (e) { /* denied or unavailable, silently ignore */ }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') requestWakeLock();
+  });
+  requestWakeLock();
 </script>
 </body>
 </html>
