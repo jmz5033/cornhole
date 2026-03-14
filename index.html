@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -10,233 +11,250 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Cornhole Scorekeeper</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/nosleep.js/dist/NoSleep.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
     body { font-family: 'Fredoka', sans-serif; background: #111; color: #fff; }
 
-    @keyframes bounceIn {
-      0% { transform: scale(0.3); opacity: 0; }
-      50% { transform: scale(1.1); }
-      70% { transform: scale(0.9); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes scorePop {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.12); }
-      100% { transform: scale(1); }
-    }
-    @keyframes confettiUp {
-      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-140px) rotate(720deg); opacity: 0; }
-    }
-    @keyframes flash {
-      0% { opacity: 0.15; }
-      100% { opacity: 0; }
-    }
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.1); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes scorePop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes confettiUp {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-140px) rotate(720deg); opacity: 0; }
+}
+@keyframes flash {
+  0% { opacity: 0.15; }
+  100% { opacity: 0; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 
-    .app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      height: 100dvh;
-    }
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
 
-    .panels {
-      display: flex;
-      flex: 1;
-      min-height: 0;
-    }
+.panels {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
 
-    .panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      position: relative;
-      overflow: hidden;
-      transition: filter 0.1s;
-    }
-    .panel:active { filter: brightness(1.1); }
-    .panel--left {
-      border-right: 3px solid rgba(0,0,0,0.4);
-    }
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  transition: filter 0.1s;
+}
+.panel:active { filter: brightness(1.1); }
 
-    .color-dot {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.5);
-      cursor: pointer;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 5;
-    }
-    .color-dot:active { transform: scale(1.2); }
+.panel__flash {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.15);
+  pointer-events: none;
+  animation: flash 0.25s ease-out forwards;
+}
 
-    .color-picker-overlay {
-      position: absolute;
-      z-index: 10;
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.78);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      max-width: 200px;
-    }
+.team-name {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 2;
+}
+.team-name-input {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  color: #fff;
+  text-align: center;
+  font-size: 16px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  padding: 6px 12px;
+  width: 80%;
+  max-width: 180px;
+  outline: none;
+  position: relative;
+  z-index: 5;
+}
 
-    .swatch {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 3px solid transparent;
-      transition: transform 0.15s, border-color 0.15s;
-    }
-    .swatch:active { transform: scale(1.15); }
-    .swatch--active {
-      border-color: #fff;
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
-    }
+.score {
+  font-family: 'Lilita One', sans-serif;
+  font-size: min(36vw, 200px);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 2;
+}
+.score--pop { animation: scorePop 0.25s ease-out; }
 
-    .panel__flash {
-      position: absolute; inset: 0;
-      background: rgba(255,255,255,0.15);
-      pointer-events: none;
-      animation: flash 0.25s ease-out forwards;
-    }
+.tap-hint {
+  margin-top: 16px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 2;
+}
 
-    .team-name {
-      font-size: 16px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 8px;
-      position: relative;
-      z-index: 2;
-    }
-    .team-name-input {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 8px;
-      color: #fff;
-      text-align: center;
-      font-size: 16px;
-      font-family: 'Fredoka', sans-serif;
-      font-weight: 600;
-      padding: 6px 12px;
-      width: 80%;
-      max-width: 180px;
-      outline: none;
-      position: relative;
-      z-index: 5;
-    }
+.controls {
+  background: rgba(0,0,0,0.6);
+  padding: 14px 20px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
 
-    .score {
-      font-family: 'Lilita One', sans-serif;
-      font-size: min(36vw, 200px);
-      line-height: 1;
-      color: #fff;
-      text-shadow: 0 6px 24px rgba(0,0,0,0.4);
-      position: relative;
-      z-index: 2;
-    }
-    .score--pop { animation: scorePop 0.25s ease-out; }
+.btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.5);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  outline: none;
+}
+.btn:active { transform: scale(0.95); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .tap-hint {
-      margin-top: 16px;
-      font-size: 12px;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: 1px;
-      position: relative;
-      z-index: 2;
-    }
+.label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  padding: 0 8px;
+}
 
-    .controls {
-      background: rgba(0,0,0,0.6);
-      padding: 14px 20px;
-      padding-bottom: max(14px, env(safe-area-inset-bottom));
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      align-items: center;
-    }
+/* Color picker overlay */
+.color-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: fadeIn 0.2s ease;
+}
+.color-picker {
+  background: #1e1e1e;
+  border-radius: 20px;
+  padding: 28px;
+  width: 300px;
+  max-width: 90vw;
+  animation: slideUp 0.3s ease;
+}
+.color-picker h3 {
+  font-family: 'Lilita One', sans-serif;
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: rgba(255,255,255,0.9);
+}
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.color-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  outline: none;
+}
+.color-swatch:active { transform: scale(0.9); }
+.color-swatch.selected { border-color: #fff; transform: scale(1.08); }
+.color-cancel {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.6);
+  font-size: 15px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+.color-cancel:active { transform: scale(0.97); }
 
-    .btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      color: rgba(255,255,255,0.5);
-      padding: 10px 16px;
-      font-size: 14px;
-      font-family: 'Fredoka', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      outline: none;
-    }
-    .btn:active { transform: scale(0.95); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Winner overlay */
+.winner-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: bounceIn 0.5s ease;
+}
+.winner-content { text-align: center; padding: 40px; position: relative; }
+.winner-emoji { font-size: 56px; margin-bottom: 16px; }
+.winner-name {
+  font-family: 'Lilita One', sans-serif;
+  font-size: 42px;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  margin-bottom: 8px;
+}
+.winner-sub {
+  font-size: 20px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+  margin-bottom: 36px;
+}
+.winner-btn {
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  color: #fff;
+  padding: 16px 40px;
+  font-size: 18px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+}
+.winner-btn:active { transform: scale(0.95); }
 
-    .label {
-      font-size: 12px;
-      color: rgba(255,255,255,0.25);
-      padding: 0 8px;
-    }
+.confetti-piece { position: absolute; }
 
-    /* Winner overlay */
-    .winner-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      animation: bounceIn 0.5s ease;
-    }
-    .winner-content { text-align: center; padding: 40px; position: relative; }
-    .winner-emoji { font-size: 56px; margin-bottom: 16px; }
-    .winner-name {
-      font-family: 'Lilita One', sans-serif;
-      font-size: 42px;
-      text-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      margin-bottom: 8px;
-    }
-    .winner-sub {
-      font-size: 20px;
-      color: rgba(255,255,255,0.6);
-      font-weight: 500;
-      margin-bottom: 36px;
-    }
-    .winner-btn {
-      border: 2px solid rgba(255,255,255,0.2);
-      border-radius: 16px;
-      color: #fff;
-      padding: 16px 40px;
-      font-size: 18px;
-      font-family: 'Fredoka', sans-serif;
-      font-weight: 700;
-      cursor: pointer;
-      outline: none;
-    }
-    .winner-btn:active { transform: scale(0.95); }
-
-    .confetti-piece {
-      position: absolute;
-      width: 8px; height: 8px;
-    }
   </style>
 </head>
 <body>
@@ -246,29 +264,33 @@
 <script>
   const WINNING_SCORE = 21;
 
-  const COLORS = [
-    { name: 'Blue',   color: '#1a4b8c', accent: '#3b7ddd' },
-    { name: 'Yellow', color: '#c89200', accent: '#f5bf00' },
-    { name: 'Red',    color: '#b52828', accent: '#e03131' },
-    { name: 'Green',  color: '#1a7a3f', accent: '#2f9e44' },
-    { name: 'Purple', color: '#5c2d8c', accent: '#9c5ce0' },
-    { name: 'Orange', color: '#b54a00', accent: '#e8680a' },
-    { name: 'Pink',   color: '#8c1a5c', accent: '#d63092' },
-    { name: 'Teal',   color: '#0a6b6b', accent: '#1aada0' },
+  const COLOR_OPTIONS = [
+    { name: 'Yellow',  color: '#c89200', accent: '#f5bf00' },
+    { name: 'Blue',    color: '#1a4b8c', accent: '#3b7ddd' },
+    { name: 'Red',     color: '#a82020', accent: '#e03e3e' },
+    { name: 'Green',   color: '#1e7a3a', accent: '#40c463' },
+    { name: 'Purple',  color: '#6b2fa0', accent: '#9b59b6' },
+    { name: 'Orange',  color: '#c65d07', accent: '#f08c00' },
+    { name: 'Teal',    color: '#0e7c7b', accent: '#20c9b0' },
+    { name: 'Pink',    color: '#b5357a', accent: '#e64ca1' },
   ];
 
   const state = {
     teams: [
-      { name: 'Team 1', score: 0, color: '#1a4b8c', accent: '#3b7ddd' },
-      { name: 'Team 2', score: 0, color: '#c89200', accent: '#f5bf00' },
+      { name: 'Team 1', score: 0, colorIndex: 1 },
+      { name: 'Team 2', score: 0, colorIndex: 0 },
     ],
     history: [],
     winner: null,
     editingName: null,
     flashing: null,
     popTeam: null,
-    colorPicking: null,
+    colorPicker: null,  // null or team index
   };
+
+  function getColor(teamIndex) {
+    return COLOR_OPTIONS[state.teams[teamIndex].colorIndex];
+  }
 
   function render() {
     const app = document.getElementById('app');
@@ -278,8 +300,10 @@
     let html = `<div class="panels">`;
 
     for (let i = 0; i < 2; i++) {
-      const side = i === 0 ? 'left' : 'right';
-      html += `<div class="panel panel--${side}" style="background:linear-gradient(170deg,${t[i].color}ee,${t[i].color}cc)" onclick="addPoint(${i})">`;
+      const c = getColor(i);
+      const divider = i === 0 ? 'border-right: 3px solid rgba(0,0,0,0.4);' : '';
+
+      html += `<div class="panel" style="background:linear-gradient(170deg,${c.color}ee,${c.color}bb);${divider}" onclick="addPoint(${i})">`;
 
       if (state.flashing === i) {
         html += `<div class="panel__flash"></div>`;
@@ -293,18 +317,12 @@
       } else {
         html += `<div style="display:flex;align-items:center;gap:8px;position:relative;z-index:5">
           <div class="team-name" onclick="event.stopPropagation(); editName(${i})">${t[i].name}</div>
-          <div class="color-dot" style="background:${t[i].accent}" onclick="event.stopPropagation(); openColorPicker(${i})"></div>
-          ${state.colorPicking === i ? `<div class="color-picker-overlay" onclick="event.stopPropagation()">
-            ${COLORS.map((c, ci) => `<div class="swatch${t[i].color === c.color ? ' swatch--active' : ''}"
-              style="background:${c.accent}"
-              title="${c.name}"
-              onclick="event.stopPropagation(); setColor(${i}, ${ci})"></div>`).join('')}
-          </div>` : ''}
+          <div onclick="event.stopPropagation(); openColorPicker(${i})" style="width:20px;height:20px;border-radius:50%;background:${c.accent};border:2px solid rgba(255,255,255,0.5);cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>
         </div>`;
       }
 
       const popClass = state.popTeam === i ? ' score--pop' : '';
-      html += `<div class="score${popClass}" id="score-${i}">${t[i].score}</div>`;
+      html += `<div class="score${popClass}">${t[i].score}</div>`;
 
       if (w === null) {
         html += `<div class="tap-hint">TAP TO SCORE</div>`;
@@ -333,9 +351,30 @@
       </button>
     </div>`;
 
+    // Color picker
+    if (state.colorPicker !== null) {
+      const ti = state.colorPicker;
+      const currentIdx = t[ti].colorIndex;
+      html += `<div class="color-overlay" onclick="closeColorPicker()">
+        <div class="color-picker" onclick="event.stopPropagation()">
+          <h3>${t[ti].name} Color</h3>
+          <div class="color-grid">`;
+
+      COLOR_OPTIONS.forEach((opt, idx) => {
+        const sel = idx === currentIdx ? ' selected' : '';
+        html += `<button class="color-swatch${sel}" style="background:linear-gradient(145deg,${opt.accent},${opt.color})" onclick="pickColor(${ti},${idx})" title="${opt.name}"></button>`;
+      });
+
+      html += `</div>
+          <button class="color-cancel" onclick="closeColorPicker()">Done</button>
+        </div>
+      </div>`;
+    }
+
     // Winner overlay
     if (w !== null) {
-      const colors = [t[w].accent, '#f59f00', '#51cf66', '#ff6b6b', '#748ffc'];
+      const wc = getColor(w);
+      const colors = [wc.accent, '#f59f00', '#51cf66', '#ff6b6b', '#748ffc'];
       let confetti = '';
       for (let i = 0; i < 14; i++) {
         const left = 10 + Math.random() * 80;
@@ -350,9 +389,9 @@
         <div class="winner-content">
           ${confetti}
           <div class="winner-emoji">🏆</div>
-          <div class="winner-name" style="color:${t[w].accent}">${t[w].name}</div>
+          <div class="winner-name" style="color:${wc.accent}">${t[w].name}</div>
           <div class="winner-sub">wins the game!</div>
-          <button class="winner-btn" style="background:linear-gradient(145deg,${t[w].accent},${t[w].color});box-shadow:0 6px 24px ${t[w].color}66" onclick="resetGame()">Play Again</button>
+          <button class="winner-btn" style="background:linear-gradient(145deg,${wc.accent},${wc.color});box-shadow:0 6px 24px ${wc.color}66" onclick="resetGame()">Play Again</button>
         </div>
       </div>`;
     }
@@ -361,8 +400,7 @@
   }
 
   function addPoint(teamIndex) {
-    if (state.winner !== null) return;
-    if (state.colorPicking !== null) { state.colorPicking = null; render(); return; }
+    if (state.winner !== null || state.colorPicker !== null) return;
     state.teams[teamIndex].score++;
     state.history.push({ teamIndex, prevScore: state.teams[teamIndex].score - 1 });
     state.flashing = teamIndex;
@@ -394,19 +432,6 @@
     state.teams[1].score = 0;
     state.history = [];
     state.winner = null;
-    state.colorPicking = null;
-    render();
-  }
-
-  function openColorPicker(teamIndex) {
-    state.colorPicking = state.colorPicking === teamIndex ? null : teamIndex;
-    render();
-  }
-
-  function setColor(teamIndex, colorIndex) {
-    state.teams[teamIndex].color = COLORS[colorIndex].color;
-    state.teams[teamIndex].accent = COLORS[colorIndex].accent;
-    state.colorPicking = null;
     render();
   }
 
@@ -426,9 +451,83 @@
     render();
   }
 
+  function openColorPicker(teamIndex) {
+    state.colorPicker = teamIndex;
+    render();
+  }
+
+  function closeColorPicker() {
+    state.colorPicker = null;
+    render();
+  }
+
+  function pickColor(teamIndex, colorIndex) {
+    state.teams[teamIndex].colorIndex = colorIndex;
+    render();
+  }
+
+  // Keep screen awake on iOS — inline video trick
+  // Creates a tiny looping video that prevents auto-lock
+  function preventSleep() {
+    const video = document.createElement('video');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('loop', '');
+    video.muted = true;
+    video.style.position = 'fixed';
+    video.style.top = '-1px';
+    video.style.left = '-1px';
+    video.style.width = '1px';
+    video.style.height = '1px';
+    video.style.opacity = '0.01';
+    video.style.pointerEvents = 'none';
+    video.style.zIndex = '-1';
+
+    // Tiny base64-encoded silent mp4 (< 1KB)
+    const base64Mp4 = 'AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAA' +
+      'PBtZGF0AAACrwYF//+r3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE1NyByMjk4MSBB' +
+      'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
+      'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
+      'QUFBQUFBQWCAAABIm1vb3YAAABsbXZoZAAAAAAAAAAAAAAAAAAAA+gAAABkAAEAAAEAAAAA' +
+      'AAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA' +
+      'AAAAAAAAAAAAAAAAAAAgAAABppdHJhawAAAFx0a2hkAAAAAwAAAAAAAAAAAAAAAQAAAAAAAABk' +
+      'AAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAIAAAACAAAAAAAJGVkdHMAAAAcZWxz' +
+      'dAAAAAAAAAABAAAAZAAAAAAAAQAAAAAA';
+
+    // Use a blob URL
+    try {
+      const byteChars = atob(base64Mp4);
+      const byteNums = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([new Uint8Array(byteNums)], { type: 'video/mp4' });
+      video.src = URL.createObjectURL(blob);
+    } catch(e) {
+      // Fallback: use a data URI
+      video.src = 'data:video/mp4;base64,' + base64Mp4;
+    }
+
+    document.body.appendChild(video);
+
+    function startVideo() {
+      video.play().catch(() => {});
+    }
+
+    // Start on first interaction
+    document.addEventListener('click', startVideo, { once: true });
+    document.addEventListener('touchstart', startVideo, { once: true });
+
+    // Restart if paused (e.g. returning from background)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        video.play().catch(() => {});
+      }
+    });
+  }
+  preventSleep();
+
   render();
 
-  // Wake Lock API — primary method (Chrome/Android, Safari 16.4+)
+  // Wake Lock — keep screen on while the app is active
   let wakeLock = null;
   async function requestWakeLock() {
     if (!('wakeLock' in navigator)) return;
@@ -440,14 +539,7 @@
     if (document.visibilityState === 'visible') requestWakeLock();
   });
   requestWakeLock();
-
-  // NoSleep.js — hidden video fallback for older iOS Safari
-  const noSleep = new NoSleep();
-  function enableNoSleep() {
-    noSleep.enable();
-  }
-  document.addEventListener('touchstart', enableNoSleep, { once: true });
-  document.addEventListener('click', enableNoSleep, { once: true });
 </script>
+
 </body>
 </html>
