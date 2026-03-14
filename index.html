@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Cornhole Scorekeeper</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/nosleep.js/dist/NoSleep.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
@@ -466,68 +467,14 @@
     render();
   }
 
-  // Keep screen awake on iOS — inline video trick
-  // Creates a tiny looping video that prevents auto-lock
-  function preventSleep() {
-    const video = document.createElement('video');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
-    video.setAttribute('loop', '');
-    video.muted = true;
-    video.style.position = 'fixed';
-    video.style.top = '-1px';
-    video.style.left = '-1px';
-    video.style.width = '1px';
-    video.style.height = '1px';
-    video.style.opacity = '0.01';
-    video.style.pointerEvents = 'none';
-    video.style.zIndex = '-1';
-
-    // Tiny base64-encoded silent mp4 (< 1KB)
-    const base64Mp4 = 'AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAA' +
-      'PBtZGF0AAACrwYF//+r3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE1NyByMjk4MSBB' +
-      'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
-      'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB' +
-      'QUFBQUFBQWCAAABIm1vb3YAAABsbXZoZAAAAAAAAAAAAAAAAAAAA+gAAABkAAEAAAEAAAAA' +
-      'AAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA' +
-      'AAAAAAAAAAAAAAAAAAAgAAABppdHJhawAAAFx0a2hkAAAAAwAAAAAAAAAAAAAAAQAAAAAAAABk' +
-      'AAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAIAAAACAAAAAAAJGVkdHMAAAAcZWxz' +
-      'dAAAAAAAAAABAAAAZAAAAAAAAQAAAAAA';
-
-    // Use a blob URL
-    try {
-      const byteChars = atob(base64Mp4);
-      const byteNums = new Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([new Uint8Array(byteNums)], { type: 'video/mp4' });
-      video.src = URL.createObjectURL(blob);
-    } catch(e) {
-      // Fallback: use a data URI
-      video.src = 'data:video/mp4;base64,' + base64Mp4;
-    }
-
-    document.body.appendChild(video);
-
-    function startVideo() {
-      video.play().catch(() => {});
-    }
-
-    // Start on first interaction
-    document.addEventListener('click', startVideo, { once: true });
-    document.addEventListener('touchstart', startVideo, { once: true });
-
-    // Restart if paused (e.g. returning from background)
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        video.play().catch(() => {});
-      }
-    });
-  }
-  preventSleep();
-
   render();
 
-  // Wake Lock — keep screen on while the app is active
+  // NoSleep.js — keeps screen awake on iOS via a tested looping video
+  const noSleep = new NoSleep();
+  document.addEventListener('touchstart', () => noSleep.enable(), { once: true });
+  document.addEventListener('click',      () => noSleep.enable(), { once: true });
+
+  // Wake Lock API — native support on Chrome/Android and Safari 16.4+
   let wakeLock = null;
   async function requestWakeLock() {
     if (!('wakeLock' in navigator)) return;
