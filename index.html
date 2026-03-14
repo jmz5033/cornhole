@@ -80,9 +80,9 @@
     .color-picker-overlay {
       position: absolute;
       z-index: 10;
-      top: 50%;
+      top: calc(100% + 8px);
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       background: rgba(0,0,0,0.78);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -294,15 +294,12 @@
         html += `<div style="display:flex;align-items:center;gap:8px;position:relative;z-index:5">
           <div class="team-name" onclick="event.stopPropagation(); editName(${i})">${t[i].name}</div>
           <div class="color-dot" style="background:${t[i].accent}" onclick="event.stopPropagation(); openColorPicker(${i})"></div>
-        </div>`;
-      }
-
-      if (state.colorPicking === i) {
-        html += `<div class="color-picker-overlay" onclick="event.stopPropagation()">
-          ${COLORS.map((c, ci) => `<div class="swatch${t[i].color === c.color ? ' swatch--active' : ''}"
-            style="background:${c.accent}"
-            title="${c.name}"
-            onclick="event.stopPropagation(); setColor(${i}, ${ci})"></div>`).join('')}
+          ${state.colorPicking === i ? `<div class="color-picker-overlay" onclick="event.stopPropagation()">
+            ${COLORS.map((c, ci) => `<div class="swatch${t[i].color === c.color ? ' swatch--active' : ''}"
+              style="background:${c.accent}"
+              title="${c.name}"
+              onclick="event.stopPropagation(); setColor(${i}, ${ci})"></div>`).join('')}
+          </div>` : ''}
         </div>`;
       }
 
